@@ -1,81 +1,125 @@
+/*========== configuração ==========*/
+// Coloque aqui o e-mail que deve receber as mensagens do formulário de contato.
+// Enquanto estiver vazio, o formulário avisa o visitante para usar o LinkedIn.
+const CONTACT_EMAIL = '';
+
+
 /*========== menu icon navbar ==========*/
-let menuIcon = document.querySelector('#menu-icon');
-let navbar = document.querySelector('.navbar');
+const menuIcon = document.querySelector('#menu-icon');
+const navbar = document.querySelector('.navbar');
+const header = document.querySelector('.header');
 
-menuIcon.onclick = () => {
-    menuIcon.classList.toggle('bx-x');
-    navbar.classList.toggle('active');
-};
+function setMenu(open) {
+    menuIcon.classList.toggle('bx-x', open);
+    navbar.classList.toggle('active', open);
+    menuIcon.setAttribute('aria-expanded', String(open));
+    menuIcon.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+}
 
+menuIcon.addEventListener('click', () => {
+    setMenu(!navbar.classList.contains('active'));
+});
 
-/*========== scroll sections active link ==========*/
-let sections = document.querySelectorAll('section');
-let navLinks = document.querySelectorAll('header nav a');
-
-window.onscroll = () => {
-    sections.forEach(sec => {
-        let top = window.scrollY;
-        let offset = sec.offsetTop - 150;
-        let height = sec.offsetHeight;
-        let id = sec.getAttribute('id');
-
-        if(top >= offset && top < offset + height) {
-            navLinks.forEach(links => {
-                links.classList.remove('active');
-                document.querySelector('header nav a[href*=' + id + ']').classList.add('active');
-            });
-        };
-    });
-
-
-/*========== sticky navbar ==========*/
-let header = document.querySelector('.header');
-
-header.classList.toggle('sticky', window.scrollY > 100);
-
-
-/*========== remove menu icon navbar when click navbar link (scroll) ==========*/
-menuIcon.classList.remove('bx-x');
-navbar.classList.remove('active');
-
-};
-
-
-/*========== swiper ==========*/
-var swiper = new Swiper(".mySwiper", {
-    slidesPerView: 1,
-    spaceBetween: 50,
-    loop: true,
-    grabCursor: true,
-    pagination: {
-      el: ".swiper-pagination",
-      clickable: true,
-    },
-    navigation: {
-      nextEl: ".swiper-button-next",
-      prevEl: ".swiper-button-prev",
-    },
+// fecha o menu ao clicar em um link (no celular)
+navbar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => setMenu(false));
 });
 
 
-/*========== dark light mode ==========*/
-let darkModeIcon = document.querySelector('#darkMode-icon');
+/*========== scroll: link ativo + header fixo ==========*/
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('header nav a');
 
-darkModeIcon.onclick = () => {
-    darkModeIcon.classList.toggle('bx-sun');
-    document.body.classList.toggle('dark-mode');
-};
+function onScroll() {
+    const top = window.scrollY;
+
+    sections.forEach(sec => {
+        const offset = sec.offsetTop - 150;
+        const height = sec.offsetHeight;
+
+        if (top >= offset && top < offset + height) {
+            const id = sec.getAttribute('id');
+            navLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+            });
+        }
+    });
+
+    header.classList.toggle('sticky', top > 100);
+}
+
+window.addEventListener('scroll', () => {
+    onScroll();
+    setMenu(false);
+}, { passive: true });
+onScroll();
+
+
+/*========== dark / light mode (lembra a escolha) ==========*/
+const darkModeIcon = document.querySelector('#darkMode-icon');
+
+function applyTheme(dark) {
+    document.body.classList.toggle('dark-mode', dark);
+    darkModeIcon.classList.toggle('bx-sun', dark);
+    darkModeIcon.classList.toggle('bx-moon', !dark);
+}
+
+let savedTheme = null;
+try { savedTheme = localStorage.getItem('theme'); } catch (e) { }
+
+applyTheme(savedTheme
+    ? savedTheme === 'dark'
+    : window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+darkModeIcon.addEventListener('click', () => {
+    const dark = !document.body.classList.contains('dark-mode');
+    applyTheme(dark);
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) { }
+});
+
+
+/*========== formulário de contato ==========*/
+const form = document.querySelector('#contact-form');
+const formStatus = form.querySelector('.form-status');
+
+form.addEventListener('submit', event => {
+    event.preventDefault();
+
+    if (!CONTACT_EMAIL) {
+        formStatus.textContent = 'O formulário ainda não está configurado. Me chame pelo LinkedIn!';
+        return;
+    }
+
+    const data = new FormData(form);
+    const body =
+        `Nome: ${data.get('nome')}\n` +
+        `Email: ${data.get('email')}\n` +
+        `Celular: ${data.get('celular') || '-'}\n\n` +
+        `${data.get('mensagem')}`;
+
+    window.location.href =
+        `mailto:${CONTACT_EMAIL}` +
+        `?subject=${encodeURIComponent(data.get('assunto'))}` +
+        `&body=${encodeURIComponent(body)}`;
+
+    formStatus.textContent = 'Abrindo seu aplicativo de e-mail...';
+});
+
+
+/*========== ano no rodapé ==========*/
+document.querySelector('#year').textContent = new Date().getFullYear();
 
 
 /*========== scroll reveal ==========*/
-ScrollReveal({
-    // reset: true,
-    distance: '80px',
-    duration: 2000,
-    delay: 200
-});
+if (window.ScrollReveal && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    ScrollReveal({
+        distance: '80px',
+        duration: 2000,
+        delay: 200
+    });
 
-ScrollReveal().reveal('.home-content, .heading', { origin: 'top' });
-ScrollReveal().reveal('.home-img img, .services-container, .portfolio-box, .testimonial-wrapper, .contact form', { origin: 'bottom' });
-ScrollReveal().reveal('.home-content h1, .about-img img', { origin: 'left' });
-ScrollReveal().reveal('.home-content h3, .home-content p, .about-content', { origin: 'right' });
+    ScrollReveal().reveal('.home-content, .heading', { origin: 'top' });
+    ScrollReveal().reveal('.services-container, .portfolio-box, .contact form', { origin: 'bottom' });
+    ScrollReveal().reveal('.home-content h1, .about-img img', { origin: 'left' });
+    ScrollReveal().reveal('.home-content h3, .home-content p, .about-content', { origin: 'right' });
+}

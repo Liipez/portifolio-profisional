@@ -939,3 +939,104 @@ span {
 img {
     border-radius: 20px;
 }
+
+/* ===== melhorias ===== */
+
+/* ícones viraram <button>: remove o estilo padrão do navegador */
+#darkMode-icon,
+#menu-icon {
+    background: none;
+    cursor: pointer;
+}
+
+/* foco visível para quem navega pelo teclado */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: .3rem solid var(--main-color);
+    outline-offset: .3rem;
+}
+
+.about-img img,
+.portfolio-box img {
+    height: auto;
+}
+
+/* capa do projeto sem imagem (Padaria) */
+.portfolio-cover {
+    width: 100%;
+    aspect-ratio: 1200 / 597;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, #754ef9, #b39cff);
+    color: #fdfdfd;
+    transition: .5s ease;
+}
+
+.portfolio-cover i {
+    font-size: 7rem;
+}
+
+.portfolio-cover span {
+    color: #fdfdfd;
+    font-size: 2.4rem;
+    font-weight: 600;
+}
+
+.portfolio-box:hover .portfolio-cover {
+    transform: scale(1.1);
+}
+
+.portfolio-container .portfolio-box {
+    align-self: stretch;
+}
+
+/* em telas de toque não existe "hover": mostra a descrição sempre */
+@media (hover: none) {
+    .portfolio-box .portfolio-layer {
+        opacity: 1;
+        top: auto;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        text-align: left;
+        gap: 0 1rem;
+        padding: 4rem 1.6rem 1.4rem;
+        background: linear-gradient(transparent, rgba(0, 0, 0, .75) 45%);
+    }
+
+    .portfolio-layer h4 {
+        font-size: 2rem;
+        flex: 1;
+    }
+
+    .portfolio-layer p {
+        display: none;
+    }
+
+    .portfolio-layer a {
+        width: 3.6rem;
+        height: 3.6rem;
+    }
+}
+
+.contact .form-status {
+    margin-top: 1.5rem;
+    font-size: 1.5rem;
+    min-height: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
